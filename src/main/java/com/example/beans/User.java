@@ -67,6 +67,7 @@ public class User extends Model<User> {
     /**
      * 版本
      */
+    @Version //乐观锁注解
     private Integer version;
 
     /**
