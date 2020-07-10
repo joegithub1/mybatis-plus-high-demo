@@ -7,8 +7,10 @@ package com.example.config;/**
  */
 
 import com.baomidou.mybatisplus.extension.plugins.OptimisticLockerInterceptor;
+import org.springframework.aop.interceptor.PerformanceMonitorInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  *@description:配置类
@@ -28,5 +30,20 @@ public class MybatisPlusConfiguration {
     @Bean
     public OptimisticLockerInterceptor optimisticLockerInterceptor(){
         return new OptimisticLockerInterceptor();
+    }
+
+    /**
+    * @Title: performanceMonitorInterceptor 
+    * @Description:  性能分析 bean 一般生产环境不开启
+    * @return org.springframework.aop.interceptor.PerformanceMonitorInterceptor
+    * @date 2020-07-09 
+    * @author HuangJian
+    */
+    @Bean
+    @Profile({"dev","test"})
+    public PerformanceMonitorInterceptor performanceMonitorInterceptor(){
+        System.out.println("性能分析~~");
+        PerformanceMonitorInterceptor pmi = new PerformanceMonitorInterceptor();
+        return pmi;
     }
 }

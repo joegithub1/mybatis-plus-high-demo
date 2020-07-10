@@ -58,6 +58,7 @@
         </dependency>
 
 
+        <!--Mybatis-plus使用的是3.3.2版本,所以性能分析依赖 p6spy 组件-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -91,6 +92,16 @@
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
             <version>1.1.12</version>
+        </dependency>
+
+
+        <!-- mybatis plus 性能分析依赖
+            Mybatis-plus使用的是3.3.2版本,所以性能分析依赖 p6spy 组件
+         -->
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.0</version>
         </dependency>
 
     </dependencies>
