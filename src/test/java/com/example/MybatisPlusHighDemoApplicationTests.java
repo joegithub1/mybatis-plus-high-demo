@@ -11,15 +11,13 @@ import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.example.beans.User;
+import com.example.config.MybatisPlusConfiguration;
 import com.example.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SpringBootTest
 class MybatisPlusHighDemoApplicationTests {
@@ -55,6 +53,7 @@ class MybatisPlusHighDemoApplicationTests {
     */
     @Test
     void selectUserList() {
+        //MybatisPlusConfiguration.tlTableName.set("t_user_2020"); //动态表名替换
         List<User> users = userMapper.selectList(null);
         users.forEach(System.out::println);
     }
@@ -70,7 +69,8 @@ class MybatisPlusHighDemoApplicationTests {
     void updateById(){
         User user = new User();
         user.setId(1281119058405625857L);
-        user.setAge(26);
+        user.setAge(12);
+        user.setUpdateTime(new Date());
         int rows = userMapper.updateById(user);
         System.out.println("影响行数："+rows);
     }
@@ -78,12 +78,47 @@ class MybatisPlusHighDemoApplicationTests {
     void insertUser(){
         User user = new User();
         user.setAge(22);
-        user.setName("张三");
-        user.setEmail("zs@126.com");
-        user.setManagerId(1088248166370832385L);
+        user.setName("王五");
+        user.setEmail("wwu@baomidou.com");
+        //user.setManagerId(1088248166370832385L);
         int rows = userMapper.insert(user);
         System.out.println("影响行数："+rows);
     }
+    /**
+    * @Title: testUpdateUserlock
+    * @Description:  乐观锁 version版本号会自动加一
+     *
+     * version字段 支持的数据类型只有:int,Integer,long,Long,Date,Timestamp,LocalDateTime
+     *
+     *
+    * @return void
+    * @date 2020-07-09
+    * @author HuangJian
+    */
+    @Test
+    void testUpdateUserLock(){
+        User userOld = userMapper.selectById(1281119058405625857L);
+        User user = new User();
+        user.setId(userOld.getId());
+        user.setVersion(userOld.getVersion());
+        user.setEmail("zhangsan001@baomidou.com");
+        int rows = userMapper.updateById(user);
+        System.out.println("影响行数："+rows);
+    }
+    /**
+    * @Title:
+    * @Description:  多租户查询  拦截
+    * @param null
+    * @return
+    * @date 2020-07-12
+    * @author HuangJian
+    */
+    @Test
+    void selectById(){
+        User user = userMapper.selectById(1087982257332887553L);
+        System.out.println(user);
+    }
+
     @Test
     void testGenerator() {
         //1. 全局配置
