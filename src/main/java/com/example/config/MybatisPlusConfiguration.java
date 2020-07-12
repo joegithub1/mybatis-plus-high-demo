@@ -9,13 +9,10 @@ package com.example.config;/**
 import com.baomidou.mybatisplus.core.parser.ISqlParser;
 import com.baomidou.mybatisplus.core.parser.ISqlParserFilter;
 import com.baomidou.mybatisplus.core.parser.SqlParserHelper;
+import com.baomidou.mybatisplus.extension.parsers.DynamicTableNameParser;
+import com.baomidou.mybatisplus.extension.parsers.ITableNameHandler;
 import com.baomidou.mybatisplus.extension.plugins.OptimisticLockerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.tenant.TenantHandler;
-import com.baomidou.mybatisplus.extension.plugins.tenant.TenantSqlParser;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.LongValue;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.aop.interceptor.PerformanceMonitorInterceptor;
@@ -25,6 +22,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *@description:配置类
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 @Configuration
 public class MybatisPlusConfiguration {
 
+    public static ThreadLocal<String> tlTableName = new ThreadLocal();
     /**
     * @Title: optimisticLockerInterceptor 
     * @Description:  乐观锁  bean
@@ -71,8 +71,9 @@ public class MybatisPlusConfiguration {
     public PaginationInterceptor paginationInterceptor(){
         PaginationInterceptor p = new PaginationInterceptor();
         //start---------------------------多租户信息表级别过滤  (查询当前登录人信息)
-        /*ArrayList<ISqlParser> iSqlParsers = new ArrayList<>();
-        TenantSqlParser tenantSqlParser = new TenantSqlParser();
+
+        ArrayList<ISqlParser> iSqlParsers = new ArrayList<>();
+        /*TenantSqlParser tenantSqlParser = new TenantSqlParser();
         tenantSqlParser.setTenantHandler(new TenantHandler() {
             //
             @Override
@@ -97,14 +98,34 @@ public class MybatisPlusConfiguration {
             }
         });
         iSqlParsers.add(tenantSqlParser);
-        p.setSqlParserList(iSqlParsers);*/
+         */
+
+        //-------------------------------动态表名 （未完成效果）
+        DynamicTableNameParser dynamicTableNameParser = new DynamicTableNameParser();
+        Map<String, ITableNameHandler> tableNameHandlerMap = new HashMap<>();
+        //tableNameHandlerMap key: 数据库表名 不是实体类表名
+        tableNameHandlerMap.put("t_user", new ITableNameHandler() {
+            @Override
+            public String dynamicTableName(MetaObject metaObject, String sql, String tableName) {
+                System.out.println(tableName+"\t替换为："+tlTableName.get());
+                return tlTableName.get();
+            }
+        });
+        dynamicTableNameParser.setTableNameHandlerMap(tableNameHandlerMap);
+        iSqlParsers.add(dynamicTableNameParser);
+        p.setSqlParserList(iSqlParsers);
+
+
+
+
+
 
         //start---------------------------多租户信息方法级别过滤  (查询当前登录人信息)
         p.setSqlParserFilter(new ISqlParserFilter() {
             @Override
             public boolean doFilter(MetaObject metaObject) {
                 MappedStatement ms = SqlParserHelper.getMappedStatement(metaObject);
-                if(!StringUtils.isEmpty(ms.getId()) && ms.getId().contains("getById")){
+                if(!StringUtils.isEmpty(ms.getId()) && ms.getId().contains("selectById")){
                     //不增加多租户信息查询
                     return true;
                 }
